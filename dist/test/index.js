@@ -14,10 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const index_1 = __importDefault(require("../index"));
-const googleUrl = 'https://www.google.com/search?ei=iz9XX9KrI9m50PEPvdaxoAk&q=hello+world&oq=hello+world&gs_lcp=CgZwc3ktYWIQAzIFCAAQkQIyBQgAEJECMgIIADIFCC4QsQMyAgguMgUIABCxAzIFCAAQsQMyBQgAELEDMgIIADICCAA6BAgAEEc6BAgAEEM6BAguEEM6CAguEJECEJMCUKpCWPlGYPNHaABwAngAgAG6AogB0AWSAQcwLjEuMS4xmAEAoAEBqgEHZ3dzLXdpesABAQ&sclient=psy-ab&ved=0ahUKEwiSnf7qkNnrAhXZHDQIHT1rDJQQ4dUDCAw&uact=5';
+const googleUrl = 'https://www.google.com/search?q=hello+world&oq=hello+world';
 const proxyList = new index_1.default('123', {
     included_text: "hello world",
     url: googleUrl
+});
+const nodeFetchTest = () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log({ proxyList });
+    let response = yield proxyList.proxyFetch(googleUrl, {});
+    let responsePayload = yield response.text();
+    console.log({ responsePayload });
 });
 const puppeteerTest = () => __awaiter(void 0, void 0, void 0, function* () {
     let oneProxy = yield proxyList.getOneProxy();
@@ -27,6 +33,8 @@ const puppeteerTest = () => __awaiter(void 0, void 0, void 0, function* () {
     const page = yield browser.newPage();
     yield page.goto(googleUrl);
     yield page.screenshot({ path: 'example.png' });
+    yield browser.close();
 });
+nodeFetchTest();
 puppeteerTest();
 //# sourceMappingURL=index.js.map

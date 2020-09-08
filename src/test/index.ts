@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer'
 import ProxyList from '../index'
 
-const googleUrl = 'https://www.google.com/search?ei=iz9XX9KrI9m50PEPvdaxoAk&q=hello+world&oq=hello+world&gs_lcp=CgZwc3ktYWIQAzIFCAAQkQIyBQgAEJECMgIIADIFCC4QsQMyAgguMgUIABCxAzIFCAAQsQMyBQgAELEDMgIIADICCAA6BAgAEEc6BAgAEEM6BAguEEM6CAguEJECEJMCUKpCWPlGYPNHaABwAngAgAG6AogB0AWSAQcwLjEuMS4xmAEAoAEBqgEHZ3dzLXdpesABAQ&sclient=psy-ab&ved=0ahUKEwiSnf7qkNnrAhXZHDQIHT1rDJQQ4dUDCAw&uact=5'
+const googleUrl = 'https://www.google.com/search?q=hello+world&oq=hello+world'
 const proxyList = new ProxyList('123', {
     included_text: "hello world",
     url: googleUrl
