@@ -1,60 +1,28 @@
-import { Page } from 'puppeteer';
-export declare const logger: {
-    info: {
-        (...data: any[]): void;
-        (message?: any, ...optionalParams: any[]): void;
-    };
-};
-export declare const screenshot: any;
-export declare const store: any;
-export declare class taskableEnv {
-    taskId: string;
-    page: Page;
-    resolve: any;
-    steps: Array<any>;
-    step: any;
-    currentStep: number;
-    taskableContext: taskableContext;
-    constructor(taskId: string, page: Page, resolve: any);
-    newStep(): any;
-    createStep(): {
-        stepNumber: number;
-        resultStore: any[];
-        screenshots: any[];
-        logs: any[];
-    };
-    fail(err: string): Promise<void>;
-    stepComplete(progress: number): Promise<unknown>;
-    taskComplete(): void;
-    captureLogs(): void;
-    screenshot(name: string, args?: any): Promise<string>;
-    store(data: any): void;
+interface ProxyListInterface {
+    ip: string;
+    port: number;
+    protocol: string;
+    country: string;
+    source: string;
+    anonymity_level: string;
+    expire_time: number;
 }
-declare class taskableContext {
-    page: any;
-    taskComplete: any;
-    screenshot: any;
-    store: any;
-    newStep: any;
-    stepComplete: any;
-    fail: any;
-    constructor(page: Page, taskComplete: any, screenshot: any, store: any, newStep: any, stepComplete: any, fail: any);
-    run(steps: Array<step>): Promise<void>;
+interface ProxyConfig {
+    url: string;
+    included_text: string | null | undefined;
 }
-export declare class step {
-    func: any;
-    store: any;
-    screenshot: any;
-    constructor(func: any);
-    run(page: Page, context: any): Promise<any>;
+declare class ProxyList {
+    private proxyListUrl;
+    private privateKey;
+    private proxyListConfig;
+    private proxyList;
+    constructor(privateKey: string, proxyListConfig: ProxyConfig);
+    getOneProxy(): Promise<ProxyListInterface | null>;
+    getProxies(): Promise<ProxyListInterface[] | []>;
+    findProxies(): Promise<void>;
+    stringIsAValidUrl: (s: string) => boolean;
+    proxyFetch(url: string, { ...arg }: {
+        [x: string]: any;
+    }): Promise<any>;
 }
-export interface TaskableStepParameters {
-    page: Page;
-    store(data: any): any;
-    screenshot(name?: string, options?: any): any;
-}
-export declare const vars: any;
-export declare const task: {
-    run: (tasks: Array<step>) => Promise<void>;
-};
-export {};
+export default ProxyList;

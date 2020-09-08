@@ -15,7 +15,7 @@ interface ProxyListInterface {
 
 interface ProxyConfig {
   url: string
-  includes: string | null | undefined
+  included_text: string | null | undefined
 }
 
 /**
@@ -61,9 +61,9 @@ class ProxyList {
   /**
    * Get first proxy you find.
    */
-  async getOneProxy(): Promise<string> {
+  async getOneProxy(): Promise<ProxyListInterface | null> {
     let proxies = await this.getProxies()
-    return proxies && proxies[0] && proxies[0].ip ? proxies[0].ip : ''
+    return proxies && proxies[0] ? proxies[0] : null
   }
 
   /**
@@ -73,22 +73,23 @@ class ProxyList {
     if (!this.proxyList.length) {
       await this.findProxies()
     }
-    return !this.proxyList.length ? this.proxyList : []
+    return this.proxyList.length ? this.proxyList : []
   }
 
   /**
    * Fetch all proxies
    */
   async findProxies() {
-    let url = `${this.proxyListUrl}?url=${this.proxyListConfig.url}`
+    let url = `${this.proxyListUrl}?url=${encodeURIComponent(this.proxyListConfig.url)}`
 
     // If we have the includes paramater let's add it.
-    if (this.proxyListConfig.includes) {
-      url = `${url}&includes=${this.proxyListConfig.includes}`
+    if (this.proxyListConfig.included_text) {
+      url = `${url}&included_text=${encodeURIComponent(this.proxyListConfig.included_text)}`
     }
+
     let response = await fetch(url, {
       headers: {
-        'Authorization Bearer': this.privateKey,
+        'Authorization': `Bearer ${this.privateKey}`,
       },
     })
 
@@ -113,9 +114,14 @@ class ProxyList {
    * @param url 
    * @param param1 
    */
-  async proxyFetch(url: string, { ...arg }) {
-    let proxy = this.getOneProxy()
-    let agent = HttpsProxyAgent(proxy)
+  async proxyFetch(url: string, { ...arg }): Promise<any> {
+    let proxy = await this.getOneProxy()
+
+    if (!proxy) {
+      throw new Error("Could not find a proxy")
+    }
+
+    let agent = new HttpsProxyAgent(`http://${proxy.ip}:${proxy.port}`)
     const userAgent = new UserAgent()
 
     let fetchArg = {
@@ -127,9 +133,9 @@ class ProxyList {
       }
     }
 
-    // Fetching the website
     // @ts-ignore
     let originResponse = await fetch(url, fetchArg)
+    return originResponse
   }
 }
 
