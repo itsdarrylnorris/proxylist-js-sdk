@@ -27,8 +27,6 @@ const proxyList = new ProxyList('123', {
  * Testing node fetch test.
  */
 const nodeFetchTest = async () => {
-
-    console.log({ proxyList })
     let response = await proxyList.proxyFetch(googleUrl, {})
     let responsePayload = await response.text()
     console.log({ responsePayload })
