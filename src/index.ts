@@ -22,7 +22,6 @@ interface ProxyConfig {
  * ProxyList Class
  */
 class ProxyList {
-
   /**
    * ProxyList API URL
    */
@@ -46,13 +45,20 @@ class ProxyList {
   /**
    * Constructor
    */
-  constructor(privateKey: string, proxyListConfig: ProxyConfig) {
+  constructor(privateKey: string, proxyListConfig: ProxyConfig | null | undefined) {
     this.privateKey = privateKey
-    this.proxyListConfig = proxyListConfig
+    this.proxyListConfig = {
+      url: '',
+      included_text: '',
+    }
 
-    // Small URL validatoin
-    if (!this.stringIsAValidUrl(proxyListConfig.url)) {
-      throw new Error(`This is not a valid url. ${proxyListConfig.url}`)
+    if (proxyListConfig && proxyListConfig.url && proxyListConfig.included_text) {
+      this.proxyListConfig = proxyListConfig
+
+      // Small URL validatoin
+      if (!this.stringIsAValidUrl(proxyListConfig.url)) {
+        throw new Error(`This is not a valid url. ${proxyListConfig.url}`)
+      }
     }
 
     this.findProxies()
@@ -80,57 +86,65 @@ class ProxyList {
    * Fetch all proxies
    */
   async findProxies() {
-    let url = `${this.proxyListUrl}?url=${encodeURIComponent(this.proxyListConfig.url)}`
+    let url = `${this.proxyListUrl}`
+
+    // Adding url
+    if (this.proxyListConfig.url) {
+      url = `${url}?url=${encodeURIComponent(this.proxyListConfig.url)}`
+    }
 
     // If we have the includes paramater let's add it.
-    if (this.proxyListConfig.included_text) {
+    if (this.proxyListConfig.url && this.proxyListConfig.included_text) {
       url = `${url}&included_text=${encodeURIComponent(this.proxyListConfig.included_text)}`
     }
 
     let response = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${this.privateKey}`,
+        Authorization: `Bearer ${this.privateKey}`,
       },
     })
 
     this.proxyList = await response.json()
+
+    return this.proxyList
   }
 
   /**
    * URl Validator
-   * @param s 
+   * @param s
    */
   stringIsAValidUrl = (s: string): boolean => {
     try {
-      new URL(s);
-      return true;
+      new URL(s)
+      return true
     } catch (err) {
-      return false;
+      return false
     }
   }
 
   /**
    * Proxy Fetch
-   * @param url 
-   * @param param1 
+   * @param url
+   * @param param1
    */
   async proxyFetch(url: string, { ...arg }): Promise<any> {
     let proxy = await this.getOneProxy()
 
     if (!proxy) {
-      throw new Error("Could not find a proxy")
+      throw new Error('Could not find a proxy')
     }
 
     let agent = new HttpsProxyAgent(`http://${proxy.ip}:${proxy.port}`)
     const userAgent = new UserAgent()
 
     let fetchArg = {
-      ...arg, ...{
+      ...arg,
+      ...{
         agent,
         headers: {
           'User-Agent': userAgent.toString(),
         },
-      }
+      },
     }
 
     // @ts-ignore

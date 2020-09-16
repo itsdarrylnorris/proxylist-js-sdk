@@ -41,9 +41,15 @@ class ProxyList {
             }
         };
         this.privateKey = privateKey;
-        this.proxyListConfig = proxyListConfig;
-        if (!this.stringIsAValidUrl(proxyListConfig.url)) {
-            throw new Error(`This is not a valid url. ${proxyListConfig.url}`);
+        this.proxyListConfig = {
+            url: '',
+            included_text: '',
+        };
+        if (proxyListConfig && proxyListConfig.url && proxyListConfig.included_text) {
+            this.proxyListConfig = proxyListConfig;
+            if (!this.stringIsAValidUrl(proxyListConfig.url)) {
+                throw new Error(`This is not a valid url. ${proxyListConfig.url}`);
+            }
         }
         this.findProxies();
     }
@@ -63,16 +69,20 @@ class ProxyList {
     }
     findProxies() {
         return __awaiter(this, void 0, void 0, function* () {
-            let url = `${this.proxyListUrl}?url=${encodeURIComponent(this.proxyListConfig.url)}`;
-            if (this.proxyListConfig.included_text) {
+            let url = `${this.proxyListUrl}`;
+            if (this.proxyListConfig.url) {
+                url = `${url}?url=${encodeURIComponent(this.proxyListConfig.url)}`;
+            }
+            if (this.proxyListConfig.url && this.proxyListConfig.included_text) {
                 url = `${url}&included_text=${encodeURIComponent(this.proxyListConfig.included_text)}`;
             }
             let response = yield node_fetch_1.default(url, {
                 headers: {
-                    'Authorization': `Bearer ${this.privateKey}`,
+                    Authorization: `Bearer ${this.privateKey}`,
                 },
             });
             this.proxyList = yield response.json();
+            return this.proxyList;
         });
     }
     proxyFetch(url, _a) {
@@ -80,7 +90,7 @@ class ProxyList {
         return __awaiter(this, void 0, void 0, function* () {
             let proxy = yield this.getOneProxy();
             if (!proxy) {
-                throw new Error("Could not find a proxy");
+                throw new Error('Could not find a proxy');
             }
             let agent = new proxy_agent_1.default(`http://${proxy.ip}:${proxy.port}`);
             const userAgent = new user_agents_1.default();

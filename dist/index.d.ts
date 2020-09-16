@@ -16,10 +16,10 @@ declare class ProxyList {
     private privateKey;
     private proxyListConfig;
     private proxyList;
-    constructor(privateKey: string, proxyListConfig: ProxyConfig);
+    constructor(privateKey: string, proxyListConfig: ProxyConfig | null | undefined);
     getOneProxy(): Promise<ProxyListInterface | null>;
     getProxies(): Promise<ProxyListInterface[] | []>;
-    findProxies(): Promise<void>;
+    findProxies(): Promise<ProxyListInterface[]>;
     stringIsAValidUrl: (s: string) => boolean;
     proxyFetch(url: string, { ...arg }: {
         [x: string]: any;
